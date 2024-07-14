@@ -7,7 +7,8 @@ const index = () => {
   return (
     <FlatList
       data={posts}
-      contentContainerStyle={{ gap: 3}}
+      // className="items-center"
+      contentContainerStyle={{ gap: 3, maxWidth: 512, width: '100%'}}
       keyExtractor={(item) => item.id.toString()}
       showsVerticalScrollIndicator={false}
       renderItem={({ item }) => <PostListItem post={item} />}
