@@ -7,20 +7,20 @@ export default function TabsLayout() {
       screenOptions={{ tabBarActiveTintColor: "black", tabBarShowLabel: false }}
     >
       <Tabs.Screen
+        name="index"
+        options={{
+          headerTitle: "For you",
+          tabBarIcon: ({ color }) => (
+            <FontAwesome name="home" size={30} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="new"
         options={{
           headerTitle: "Add new post",
           tabBarIcon: ({ color }) => (
             <Feather name="plus-square" size={30} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="feed"
-        options={{
-          headerTitle: "For you",
-          tabBarIcon: ({ color }) => (
-            <FontAwesome name="home" size={30} color={color} />
           ),
         }}
       />
