@@ -3,7 +3,7 @@ import React from "react";
 import PostListItem from "~/src/components/PostListItem";
 import posts from "~/assets/data/posts.json";
 
-const index = () => {
+export default function FeedScreen(){
   return (
     <FlatList
       data={posts}
@@ -15,5 +15,3 @@ const index = () => {
     />
   );
 };
-
-export default index;

@@ -8,8 +8,9 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
+import Button from "../../components/Button";
 
-const newPost = () => {
+export default function CreatePost() {
   const [caption, setCaption] = useState("");
   const [image, setImage] = useState<string | null>(null);
 
@@ -27,8 +28,6 @@ const newPost = () => {
       aspect: [3, 4],
       quality: 1,
     });
-
-    console.log(result);
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
@@ -68,12 +67,8 @@ const newPost = () => {
 
       {/* Button */}
       <View className="w-full mt-48">
-        <Pressable className="bg-blue-500 w-full p-3 items-center rounded-lg mt-auto">
-          <Text className="text-white font-semibold">Share</Text>
-        </Pressable>
+        <Button title={"Share Post"} />
       </View>
     </View>
   );
 };
-
-export default newPost;
