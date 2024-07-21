@@ -1,4 +1,4 @@
-interface Post {
+export default interface Post {
   id: string;
   image: string;
   image_url: string;
@@ -6,7 +6,7 @@ interface Post {
   user: User;
 }
 
-interface User {
+export interface User {
   id: string;
   avatar_url: string;
   image_url: string;
