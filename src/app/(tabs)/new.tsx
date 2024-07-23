@@ -66,7 +66,7 @@ export default function CreatePost() {
       />
 
       {/* Button */}
-      <View className="w-full mt-48">
+      <View className="w-full mb-2" style={{marginTop: "auto"}}>
         <Button title={"Share Post"} />
       </View>
     </View>
