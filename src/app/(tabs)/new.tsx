@@ -10,10 +10,14 @@ import React, { useEffect, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import Button from "../../components/Button";
 import { uploadImage } from "~/src/lib/cloudinary";
+import { supabase } from "~/src/lib/supabase";
+import { useAuth } from "~/src/provides/AuthProvider";
+import { router } from "expo-router";
 
 export default function CreatePost() {
   const [caption, setCaption] = useState("");
   const [image, setImage] = useState<string | null>(null);
+  const { session } = useAuth();
 
   useEffect(() => {
     if (!image) {
@@ -36,13 +40,28 @@ export default function CreatePost() {
   };
 
   const createPost = async () => {
-    //Upload image
-    if (image) {
-      const response = await uploadImage(image);
-      console.log("image id: ", response?.public_id);
-    } else{
-      alert("Please select the image");
+    //Upload image=
+    if (!image) {
+      return;
     }
+    const response = await uploadImage(image);
+    console.log("image id: ", response?.public_id);
+
+    //Uploading image at supabase
+    const { data, error } = await supabase
+      .from("posts")
+      .insert([
+        {
+          caption,
+          image: response?.public_id,
+          user_id: session?.user.id,
+        },
+      ])
+      .select();
+      console.log("data", data);
+      console.log("error", error);
+
+      router.push("/(tabs)");
   };
 
   return (

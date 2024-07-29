@@ -17,6 +17,7 @@ import { FocusOn } from "@cloudinary/url-gen/qualifiers/focusOn";
 import { cld } from "~/src/lib/cloudinary";
 
 export default function PostListItem({ post }: { post: Interface }) {
+  console.log(post);
   const { width } = useWindowDimensions();
   const image = cld.image(post.image);
 
@@ -38,12 +39,13 @@ export default function PostListItem({ post }: { post: Interface }) {
       </View>
       
       {/* image */}
-      {/* Content */}
       <AdvancedImage cldImg={image} className="w-full aspect-square" />
+      {/* Content */}
+      <Text className="ml-3 m-2 text-xl" >{post.caption}</Text>
 
 
       {/* Icons */}
-      <View className="flex-row p-3 items-center gap-3">
+      <View className="flex-row pl-3 pb-3 pr-3 items-center gap-3">
         <AntDesign name="heart" size={22} color="black" />
         <Ionicons name="chatbubble-outline" size={22} color="black" />
         <Feather name="send" size={22} color="black" />
