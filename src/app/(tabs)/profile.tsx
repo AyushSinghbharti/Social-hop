@@ -9,6 +9,7 @@ import {
 import React, { useEffect, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import Button from "~/src/components/Button";
+import { supabase } from "~/src/lib/supabase";
 
 export default function ProfilePage () {
   const [image, setImage] = useState<string | null>(null);
@@ -63,7 +64,7 @@ export default function ProfilePage () {
       {/* Buttons */}
       <View className="gap-2 mt-auto mb-2" style={{marginTop: "auto"}}>
         <Button title="Update Profile" onPress={() => {}} />
-        <Button title="Sign Out" onPress={() => {}} />
+        <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
       </View>
     </View>
   );
