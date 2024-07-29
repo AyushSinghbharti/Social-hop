@@ -9,6 +9,7 @@ import {
 import React, { useEffect, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import Button from "../../components/Button";
+import { uploadImage } from "~/src/lib/cloudinary";
 
 export default function CreatePost() {
   const [caption, setCaption] = useState("");
@@ -26,11 +27,21 @@ export default function CreatePost() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [3, 4],
-      quality: 1,
+      quality: 0.5,
     });
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
+    }
+  };
+
+  const createPost = async () => {
+    //Upload image
+    if (image) {
+      const response = await uploadImage(image);
+      console.log("image id: ", response?.public_id);
+    } else{
+      alert("Please select the image");
     }
   };
 
@@ -66,9 +77,9 @@ export default function CreatePost() {
       />
 
       {/* Button */}
-      <View className="w-full mb-2" style={{marginTop: "auto"}}>
-        <Button title={"Share Post"} />
+      <View className="w-full mb-2" style={{ marginTop: "auto" }}>
+        <Button title={"Share Post"} onPress={createPost} />
       </View>
     </View>
   );
-};
+}
