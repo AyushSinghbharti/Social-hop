@@ -4,7 +4,8 @@ import {
   View,
   Image,
   TextInput,
-  Pressable,
+  KeyboardAvoidingView,
+  ScrollView,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
@@ -40,12 +41,11 @@ export default function CreatePost() {
   };
 
   const createPost = async () => {
-    //Upload image=
+    //Upload image
     if (!image) {
       return;
     }
     const response = await uploadImage(image);
-    console.log("image id: ", response?.public_id);
 
     //Uploading image at supabase
     const { data, error } = await supabase
@@ -58,47 +58,51 @@ export default function CreatePost() {
         },
       ])
       .select();
-      console.log("data", data);
-      console.log("error", error);
+    console.log("data", data);
+    console.log("error", error);
 
-      router.push("/(tabs)");
+    router.push("/(tabs)");
   };
 
   return (
-    <View className="p-3 items-center flex-1">
-      {/* IMage Pciker */}
-      {image ? (
-        <Image
-          source={{ uri: image }}
-          className="w-60 aspect-[3/4] bg-gray-700 shadow-2xl rounded-xl"
-        />
-      ) : (
-        <View className="w-60 aspect-[3/4] bg-slate-500 shadow-2xl rounded-xl justify-center align-middle">
-          <Text className="color-white font-bold text-center text-l">
-            No image is selected
+    <KeyboardAvoidingView behavior={"padding"} style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <View className="p-3 items-center flex-1">
+          {/* IMage Pciker */}
+          {image ? (
+            <Image
+              source={{ uri: image }}
+              className="w-60 aspect-[3/4] bg-gray-700 shadow-2xl rounded-xl"
+            />
+          ) : (
+            <View className="w-60 aspect-[3/4] bg-slate-500 shadow-2xl rounded-xl justify-center align-middle">
+              <Text className="color-white font-bold text-center text-l">
+                No image is selected
+              </Text>
+            </View>
+          )}
+
+          <Text
+            className="text-blue-500 font-semibold m-5 text-l"
+            onPress={pickImage}
+          >
+            Change
           </Text>
+
+          {/* Text Input */}
+          <TextInput
+            value={caption}
+            onChangeText={(text) => setCaption(text)}
+            placeholder="Enter name of your post"
+            className="w-full p-3"
+          />
+
+          {/* Button */}
+          <View className="w-full mb-2" style={{ marginTop: "auto" }}>
+            <Button title={"Share Post"} onPress={createPost} />
+          </View>
         </View>
-      )}
-
-      <Text
-        className="text-blue-500 font-semibold m-5 text-l"
-        onPress={pickImage}
-      >
-        Change
-      </Text>
-
-      {/* Text Input */}
-      <TextInput
-        value={caption}
-        onChangeText={(text) => setCaption(text)}
-        placeholder="Enter name of your post"
-        className="w-full p-3"
-      />
-
-      {/* Button */}
-      <View className="w-full mb-2" style={{ marginTop: "auto" }}>
-        <Button title={"Share Post"} onPress={createPost} />
-      </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

@@ -4,16 +4,27 @@ import {
   View,
   Image,
   TextInput,
-  Pressable,
+  KeyboardAvoidingView,
+  Alert,
+  ActivityIndicator,
+  Platform,
+  ScrollView,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import Button from "~/src/components/Button";
 import { supabase } from "~/src/lib/supabase";
+import { useAuth } from "~/src/provides/AuthProvider";
+import { cld, uploadImage } from "~/src/lib/cloudinary";
+import { AdvancedImage } from "cloudinary-react-native";
+import { thumbnail } from "@cloudinary/url-gen/actions/resize";
 
-export default function ProfilePage () {
+export default function ProfilePage() {
   const [image, setImage] = useState<string | null>(null);
-  const [userName, setuserName] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const { session } = useAuth();
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -21,53 +32,159 @@ export default function ProfilePage () {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 1,
+      quality: 0.5,
     });
-
-    console.log(result);
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
     }
   };
 
-  return (
-    <View className="flex-1 pt-2 bg-white px-2">
-      {/* Image Picker */}
-      {image ? (
-        <Image
-          source={{ uri: image }}
-          className="w-60 aspect-square bg-gray-700 shadow-2xl rounded-full self-center"
-        />
-      ) : (
-        <View className="w-60 aspect-square bg-slate-500 shadow-2xl rounded-full justify-center align-middle self-center">
-          <Text className="color-white font-bold text-center text-l">
-            No image is selected
-          </Text>
-        </View>
-      )}
-      <Text
-        className="text-blue-500 font-semibold m-5 text-l self-center"
-        onPress={pickImage}
-      >
-        Change
-      </Text>
+  useEffect(() => {
+    if (session) getProfile();
+  }, [session]);
 
-      {/* form */}
-      <Text className="font-semibold text-m pb-1 text-gray-600">Username</Text>
-      <TextInput
-        placeholder="Username"
-        value={userName}
-        onChangeText={(text) => setuserName(text)}
-        className="p-3 border-2 border-gray-300 rounded-lg shadow-2xl"
+  async function getProfile() {
+    try {
+      setLoading(true);
+      if (!session?.user) throw new Error("No user on the session!");
+
+      const { data, error, status } = await supabase
+        .from("profiles")
+        .select(`username, avatar_url`)
+        .eq("id", session?.user.id)
+        .single();
+      if (error && status !== 406) {
+        throw error;
+      }
+
+      if (data) {
+        setUserName(data.username);
+        setAvatarUrl(data.avatar_url);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        alert(error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function updateProfile() {
+    if (!image || !userName) {
+      Alert.alert("Please fill all spaces");
+      return;
+    }
+
+    //Uploading image at cloudinary
+    setLoading(true);
+    const response = await uploadImage(image);
+    setAvatarUrl(response?.public_id);
+
+    try {
+      if (!session?.user) throw new Error("No user on the session!");
+      const updates = {
+        id: session?.user.id,
+        username: userName,
+        avatar_url: response?.public_id,
+        updated_at: new Date(),
+      };
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .update(updates)
+        .eq("id", session?.user.id)
+        .select();
+
+      console.log(data);
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert(error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <ActivityIndicator
+        className="self-center flex-1 justify-center align-center color-blue-400"
+        size={50}
       />
-      {/* Buttons */}
-      <View className="gap-2 mt-auto mb-2" style={{marginTop: "auto"}}>
-        <Button title="Update Profile" onPress={() => {}} />
-        <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
-      </View>
-    </View>
+    );
+  }
+
+  return (
+    <KeyboardAvoidingView behavior={"padding"} style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <View className="flex-1 pt-2 bg-white px-2">
+          {/* Image Picker */}
+          {image ? (
+            <Image
+              source={{ uri: image }}
+              className="w-60 aspect-square bg-gray-700 shadow-black drop-shadow-2xl rounded-full self-center"
+            />
+          ) : avatarUrl ? (
+            <AdvancedImage
+              cldImg={cld.image(avatarUrl)}
+              className="w-60 aspect-square border-gray-500 border-2 rounded-full self-center"
+            />
+          ) : (
+            <View className="w-60 aspect-square bg-slate-500 shadow-2xl rounded-full justify-center align-middle self-center">
+              <Text className="color-white font-bold text-center text-l">
+                No image is selected
+              </Text>
+            </View>
+          )}
+          <Text
+            className="text-blue-500 font-semibold m-5 text-l self-center"
+            onPress={pickImage}
+          >
+            Change
+          </Text>
+
+          {/* form */}
+          <Text className="font-semibold text-m pb-1 text-gray-600">
+            Username
+          </Text>
+          <TextInput
+            placeholder="Username"
+            value={userName}
+            onChangeText={(text) => setUserName(text)}
+            className="p-3 border-2 border-gray-300 rounded-lg shadow-2xl"
+          />
+          <Text className="font-semibold text-m pb-1 text-gray-600">
+            Username
+          </Text>
+          <TextInput
+            placeholder="Username"
+            value={userName}
+            onChangeText={(text) => setUserName(text)}
+            className="p-3 border-2 border-gray-300 rounded-lg shadow-2xl"
+          />
+          <Text className="font-semibold text-m pb-1 text-gray-600">
+            Username
+          </Text>
+          <TextInput
+            placeholder="Username"
+            value={userName}
+            onChangeText={(text) => setUserName(text)}
+            className="p-3 border-2 border-gray-300 rounded-lg shadow-2xl"
+          />
+          {/* Buttons */}
+          <View className="gap-2 mt-auto mb-2">
+            <Button title="Update Profile" onPress={updateProfile} />
+            <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
+          </View>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
-};
+}
 
 const styles = StyleSheet.create({});
