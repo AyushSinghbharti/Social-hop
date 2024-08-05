@@ -75,8 +75,8 @@ export default function ProfilePage() {
   }
 
   async function updateProfile() {
-    if (!image && !userName && !bio) {
-      Alert.alert("Please fill all spaces");
+    if (!image || !userName ) {
+      Alert.alert("Please Upload images, username and bio");
       return;
     }
 
@@ -135,7 +135,7 @@ export default function ProfilePage() {
             />
           ) : avatarUrl ? (
             <AdvancedImage
-              cldImg={cld.image(avatarUrl)}
+              cldImg={cld.image(avatarUrl).resize(thumbnail().width(200).height(200))}
               className="w-60 aspect-square border-gray-500 border-2 rounded-full self-center"
             />
           ) : (

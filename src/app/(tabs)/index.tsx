@@ -16,7 +16,7 @@ import { useAuth } from "~/src/provides/AuthProvider";
 export default function FeedScreen() {
   const [posts, setPosts] = useState<Post[] | null>(null);
   const [loading, isLoading] = useState(false);
-  const {user} = useAuth();
+  const { user } = useAuth();
   useFocusEffect(
     useCallback(() => {
       fetchPost();
@@ -33,7 +33,7 @@ export default function FeedScreen() {
       .from("posts")
       .select("*, user: profiles(*)")
       // .eq("user_id", user?.id)
-      .order('created_at', {ascending: false})
+      .order("created_at", { ascending: false });
     if (error) {
       alert(error);
     }
@@ -51,14 +51,15 @@ export default function FeedScreen() {
     );
   }
 
-
   return (
-    <FlatList
-      data={posts}
-      contentContainerStyle={{ gap: 3, maxWidth: 512, width: "100%" }}
-      keyExtractor={(item) => item.id.toString()}
-      showsVerticalScrollIndicator={false}
-      renderItem={({ item }) => <PostListItem post={item} />}
-    />
+    <View className="flex-1 dark:bg-black">
+      <FlatList
+        data={posts}
+        contentContainerStyle={{ gap: 3, maxWidth: 512, width: "100%" }}
+        keyExtractor={(item) => item.id.toString()}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => <PostListItem post={item} />}
+      />
+    </View>
   );
 }
