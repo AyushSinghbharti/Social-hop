@@ -6,6 +6,7 @@ import {
   TextInput,
   KeyboardAvoidingView,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
@@ -18,6 +19,7 @@ import { router } from "expo-router";
 export default function CreatePost() {
   const [caption, setCaption] = useState("");
   const [image, setImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const { session } = useAuth();
 
   useEffect(() => {
@@ -41,6 +43,7 @@ export default function CreatePost() {
   };
 
   const createPost = async () => {
+    setLoading(true);
     //Upload image
     if (!image) {
       return;
@@ -58,12 +61,13 @@ export default function CreatePost() {
         },
       ])
       .select();
+    setLoading(false);
     console.log("data", data);
     console.log("error", error);
 
     router.push("/(tabs)");
   };
-
+  
   return (
     <KeyboardAvoidingView behavior={"padding"} style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -99,7 +103,14 @@ export default function CreatePost() {
 
           {/* Button */}
           <View className="w-full mb-2" style={{ marginTop: "auto" }}>
-            <Button title={"Share Post"} onPress={createPost} />
+            {loading ? (
+              <ActivityIndicator
+                size={40}
+                className=" self-center color-blue-300 m-auto"
+              />
+            ) : (
+              <Button title={"Share Post"} onPress={createPost} />
+            )}
           </View>
         </View>
       </ScrollView>

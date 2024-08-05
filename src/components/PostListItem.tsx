@@ -19,8 +19,9 @@ import { cld } from "~/src/lib/cloudinary";
 export default function PostListItem({ post }: { post: Interface }) {
   const { width } = useWindowDimensions();
   const image = cld.image(post.image);
-
   image.resize(thumbnail().width(width).height(width));
+
+  if(!post.user.avatar_url) post.user.avatar_url = "fuchqqnfvcmwu6qzsjiu";
   const avatar = cld.image(post.user.avatar_url);
   avatar.resize(
     thumbnail().width(48).height(48).gravity(focusOn(FocusOn.face()))
@@ -34,7 +35,7 @@ export default function PostListItem({ post }: { post: Interface }) {
           cldImg={avatar}
           className="w-12 aspect-square rounded-full border-gray-600 border-2"
         />
-        <Text className="font-semibold">{post.user.username}</Text>
+        <Text className="font-semibold">{post.user.username || "New user"}</Text>
       </View>
       
       {/* image */}
