@@ -18,11 +18,13 @@ import { useAuth } from "~/src/provides/AuthProvider";
 import { cld, uploadImage } from "~/src/lib/cloudinary";
 import { AdvancedImage } from "cloudinary-react-native";
 import { thumbnail } from "@cloudinary/url-gen/actions/resize";
+import CustomTextInput from "~/src/components/CustomTextInput";
 
 export default function ProfilePage() {
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState("");
+  const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const { session } = useAuth();
 
@@ -51,7 +53,7 @@ export default function ProfilePage() {
 
       const { data, error, status } = await supabase
         .from("profiles")
-        .select(`username, avatar_url`)
+        .select(`username, avatar_url, bio`)
         .eq("id", session?.user.id)
         .single();
       if (error && status !== 406) {
@@ -61,6 +63,7 @@ export default function ProfilePage() {
       if (data) {
         setUserName(data.username);
         setAvatarUrl(data.avatar_url);
+        setBio(data.bio);
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -72,7 +75,7 @@ export default function ProfilePage() {
   }
 
   async function updateProfile() {
-    if (!image || !userName) {
+    if (!image && !userName && !bio) {
       Alert.alert("Please fill all spaces");
       return;
     }
@@ -88,6 +91,7 @@ export default function ProfilePage() {
         id: session?.user.id,
         username: userName,
         avatar_url: response?.public_id,
+        bio,
         updated_at: new Date(),
       };
 
@@ -149,33 +153,24 @@ export default function ProfilePage() {
           </Text>
 
           {/* form */}
-          <Text className="font-semibold text-m pb-1 text-gray-600">
-            Username
-          </Text>
-          <TextInput
-            placeholder="Username"
-            value={userName}
-            onChangeText={(text) => setUserName(text)}
-            className="p-3 border-2 border-gray-300 rounded-lg shadow-2xl"
-          />
-          <Text className="font-semibold text-m pb-1 text-gray-600">
-            Username
-          </Text>
-          <TextInput
-            placeholder="Username"
-            value={userName}
-            onChangeText={(text) => setUserName(text)}
-            className="p-3 border-2 border-gray-300 rounded-lg shadow-2xl"
-          />
-          <Text className="font-semibold text-m pb-1 text-gray-600">
-            Username
-          </Text>
-          <TextInput
-            placeholder="Username"
-            value={userName}
-            onChangeText={(text) => setUserName(text)}
-            className="p-3 border-2 border-gray-300 rounded-lg shadow-2xl"
-          />
+          <View className="gap-3">
+            <CustomTextInput
+              label="Username"
+              placeholder="Username"
+              value={userName}
+              onChangeText={setUserName}
+              multiline
+            />
+
+            <CustomTextInput
+              label="Bio"
+              placeholder="Bio"
+              value={bio}
+              onChangeText={setBio}
+              multiline
+            />
+          </View>
+
           {/* Buttons */}
           <View className="gap-2 mt-auto mb-2">
             <Button title="Update Profile" onPress={updateProfile} />
