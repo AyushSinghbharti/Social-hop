@@ -15,6 +15,7 @@ import { uploadImage } from "~/src/lib/cloudinary";
 import { supabase } from "~/src/lib/supabase";
 import { useAuth } from "~/src/provides/AuthProvider";
 import { router } from "expo-router";
+import CustomTextInput from "~/src/components/CustomTextInput";
 
 export default function CreatePost() {
   const [caption, setCaption] = useState("");
@@ -67,9 +68,9 @@ export default function CreatePost() {
 
     router.push("/(tabs)");
   };
-  
+
   return (
-    <KeyboardAvoidingView behavior={"padding"} style={{ flex: 1 }}>
+    <KeyboardAvoidingView behavior={"padding"} style={{ flex: 1 }} className="dark:bg-black">
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View className="p-3 items-center flex-1">
           {/* IMage Pciker */}
@@ -94,11 +95,17 @@ export default function CreatePost() {
           </Text>
 
           {/* Text Input */}
-          <TextInput
+          {/* <TextInput
             value={caption}
             onChangeText={(text) => setCaption(text)}
             placeholder="Enter name of your post"
             className="w-full p-3"
+          /> */}
+          <CustomTextInput 
+            label="Caption"
+            value={caption}
+            onChangeText={setCaption}
+            placeholder="Enter name of your post"
           />
 
           {/* Button */}

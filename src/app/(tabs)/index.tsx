@@ -44,10 +44,12 @@ export default function FeedScreen() {
 
   if (loading) {
     return (
-      <ActivityIndicator
-        size={40}
-        className=" self-center color-blue-300 m-auto"
-      />
+      <View className="items-center justify-center flex-1 dark:bg-black">
+        <ActivityIndicator
+          size={50}
+          className=" self-center color-blue-300 m-auto dark:color-slate-300"
+        />
+      </View>
     );
   }
 
