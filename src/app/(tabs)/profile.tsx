@@ -124,9 +124,9 @@ export default function ProfilePage() {
   }
 
   return (
-    <KeyboardAvoidingView behavior={"padding"} style={{ flex: 1 }}>
+    <KeyboardAvoidingView behavior={"padding"} className="flex-1 bg-white dark:bg-black">
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View className="flex-1 pt-2 bg-white px-2">
+        <View className="flex-1 pt-2 px-2  bg-white dark:bg-black">
           {/* Image Picker */}
           {image ? (
             <Image
