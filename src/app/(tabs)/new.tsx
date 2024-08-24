@@ -16,40 +16,43 @@ import { supabase } from "~/src/lib/supabase";
 import { useAuth } from "~/src/provides/AuthProvider";
 import { router } from "expo-router";
 import CustomTextInput from "~/src/components/CustomTextInput";
+import { Video, ResizeMode } from "expo-av";
 
 export default function CreatePost() {
   const [caption, setCaption] = useState("");
-  const [image, setImage] = useState<string | null>(null);
+  const [media, setMedia] = useState<string | null>(null);
+  const [mediaType, setMediaType] = useState<'video' | 'image' | undefined>();
   const [loading, setLoading] = useState(false);
   const { session } = useAuth();
 
   useEffect(() => {
-    if (!image) {
+    if (!media) {
       pickImage();
     }
-  }, [image]);
+  }, [media]);
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [3, 4],
       quality: 0.5,
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      setMedia(result.assets[0].uri);
+      setMediaType(result.assets[0].type);
     }
   };
 
   const createPost = async () => {
     setLoading(true);
     //Upload image
-    if (!image) {
+    if (!media) {
       return;
     }
-    const response = await uploadImage(image);
+    const response = await uploadImage(media);
 
     //Uploading image at supabase
     const { data, error } = await supabase
@@ -59,6 +62,7 @@ export default function CreatePost() {
           caption,
           image: response?.public_id,
           user_id: session?.user.id,
+          media_type: mediaType,
         },
       ])
       .select();
@@ -70,22 +74,37 @@ export default function CreatePost() {
   };
 
   return (
-    <KeyboardAvoidingView behavior={"padding"} style={{ flex: 1 }} className="dark:bg-black">
+    <KeyboardAvoidingView
+      behavior={"padding"}
+      style={{ flex: 1 }}
+      className="dark:bg-black"
+    >
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View className="p-3 items-center flex-1">
-          {/* IMage Pciker */}
-          {image ? (
+          {/* IMage Picker */}
+          {!media ? (
+            <View className="w-60 aspect-[3/4] bg-slate-500 shadow-2xl rounded-xl justify-center align-middle">
+            <Text className="color-white font-bold text-center text-l">
+              No media is selected
+            </Text>
+          </View>
+          ) : mediaType === 'image' ? (
             <Image
-              source={{ uri: image }}
+              source={{ uri: media }}
               className="w-60 aspect-[3/4] bg-gray-700 shadow-2xl rounded-xl"
             />
           ) : (
-            <View className="w-60 aspect-[3/4] bg-slate-500 shadow-2xl rounded-xl justify-center align-middle">
-              <Text className="color-white font-bold text-center text-l">
-                No image is selected
-              </Text>
-            </View>
-          )}
+            <Video
+              style={{ width: '90%', aspectRatio: 1, borderRadius: 15 }}
+              source={{
+                uri: media,
+              }}
+              useNativeControls
+              resizeMode={ResizeMode.COVER}
+              isLooping
+              shouldPlay
+            />
+          )} 
 
           <Text
             className="text-blue-500 font-semibold m-5 text-l"
@@ -94,14 +113,7 @@ export default function CreatePost() {
             Change
           </Text>
 
-          {/* Text Input */}
-          {/* <TextInput
-            value={caption}
-            onChangeText={(text) => setCaption(text)}
-            placeholder="Enter name of your post"
-            className="w-full p-3"
-          /> */}
-          <CustomTextInput 
+          <CustomTextInput
             label="Caption"
             value={caption}
             onChangeText={setCaption}

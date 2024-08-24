@@ -4,6 +4,7 @@ export default interface Post {
   image_url: string;
   caption: string;
   user: User;
+  media_type: string;
 }
 
 export interface User {
