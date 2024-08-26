@@ -1,12 +1,14 @@
 import {
   Image,
+  Pressable,
   StyleSheet,
   Text,
   useColorScheme,
   useWindowDimensions,
   View,
+  TouchableOpacity,
 } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Feather, Ionicons, AntDesign } from "@expo/vector-icons";
 import Interface from "~/assets/data/interface";
 import { AdvancedImage } from "cloudinary-react-native";
@@ -18,19 +20,70 @@ import { FocusOn } from "@cloudinary/url-gen/qualifiers/focusOn";
 import { cld } from "~/src/lib/cloudinary";
 import { Video, ResizeMode } from "expo-av";
 import PostContent from "./PostContent";
+import { supabase } from "../lib/supabase";
+import { useAuth } from "../provides/AuthProvider";
 
 export default function PostListItem({ post }: { post: Interface }) {
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeRecord, setLikeRecord] = useState(null);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    fetchLike();
+  }, []);
+
+  useEffect(() => {
+    if (isLiked) {
+      saveLike();
+    } else {
+      deleteLike();
+    }
+  }, [isLiked]);
+
+  const fetchLike = async () => {
+    const { data, error } = await supabase
+      .from("likes")
+      .select("*")
+      .eq("user_id", user?.id)
+      .eq("post_id", post.id)
+      .select();
+    if (data && data?.length > 0) {
+      setLikeRecord(data[0]);
+      setIsLiked(true);
+    }
+  };
+
+  const saveLike = async () => {
+    if (likeRecord) return;
+
+    const result = await supabase
+      .from("likes")
+      .insert([{ user_id: user?.id, post_id: post.id }])
+      .select();
+
+    setLikeRecord(result.data[0]);
+  };
+
+  const deleteLike = async () => {
+    if (likeRecord) {
+      const { data, error } = await supabase
+        .from("likes")
+        .delete()
+        .eq("id", likeRecord.id);
+      if (!error) setLikeRecord(null);
+    }
+  };
+
   const colorScheme = useColorScheme();
   const darkMode = colorScheme === "dark";
 
-  if (!post.user.avatar_url) post.user.avatar_url = "fuchqqnfvcmwu6qzsjiu";
-  const avatar = cld.image(post.user.avatar_url);
+  const avatar = cld.image(post.user.avatar_url || "fuchqqnfvcmwu6qzsjiu");
   avatar.resize(
     thumbnail().width(48).height(48).gravity(focusOn(FocusOn.face()))
   );
 
   return (
-    <View className="bg-white dark:bg-black">
+    <View className="pt-2 bg-white dark:bg-black">
       {/* Header */}
       <View className="p-2 flex-row items-center gap-2">
         <AdvancedImage
@@ -42,7 +95,10 @@ export default function PostListItem({ post }: { post: Interface }) {
         </Text>
       </View>
 
-      <PostContent post={post} />
+      {/* Content */}
+      <TouchableOpacity onLongPress={() => setIsLiked(!isLiked)}>
+        <PostContent post={post} />
+      </TouchableOpacity>
 
       {/* Content */}
       <Text className="ml-3 m-2 text-xl mt-3 dark:text-white">
@@ -52,9 +108,10 @@ export default function PostListItem({ post }: { post: Interface }) {
       {/* Icons */}
       <View className="flex-row pl-3 pb-3 pr-3 items-center gap-4 mt-2">
         <AntDesign
-          name="hearto"
-          size={23}
-          color={darkMode ? "white" : "black"}
+          onPress={() => setIsLiked(!isLiked)}
+          name={isLiked ? "heart" : "hearto"}
+          size={25}
+          color={!isLiked ? (darkMode ? "white" : "black") : "crimson"}
         />
         <Ionicons
           name="chatbubble-outline"

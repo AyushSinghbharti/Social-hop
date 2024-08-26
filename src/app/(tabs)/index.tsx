@@ -54,7 +54,7 @@ export default function FeedScreen() {
   }
 
   return (
-    <View className="flex-1 dark:bg-black">
+    <View className="flex-1 dark:bg-gray-900">
       <FlatList
         data={posts}
         contentContainerStyle={{ gap: 3, maxWidth: 512, width: "100%" }}
