@@ -29,7 +29,7 @@ export default function PostListItem({ post }: { post: Interface }) {
   const { user } = useAuth();
 
   useEffect(() => {
-    if(post.my_likes.length > 0){
+    if (post.my_likes.length > 0) {
       setLikeRecord(post.my_likes[0]);
       setIsLiked(true);
     }
@@ -63,8 +63,8 @@ export default function PostListItem({ post }: { post: Interface }) {
       .from("likes")
       .insert([{ user_id: user?.id, post_id: post.id }])
       .select();
-    
-    if(result.data) setLikeRecord(result.data[0]);
+
+    if (result.data) setLikeRecord(result.data[0]);
   };
 
   const deleteLike = async () => {
@@ -127,7 +127,9 @@ export default function PostListItem({ post }: { post: Interface }) {
         </View>
       </View>
       {/* Content */}
-      <Text className="ml-3 font-bold text-l dark:text-white">54 Likes</Text>
+      <Text className="ml-3 font-bold text-l dark:text-white">
+        {post.likes?.[0]?.count || 0} Likes
+      </Text>
       <Text className="ml-3 text-l mb-3 dark:text-white">
         <Text className="text-xl font-semibold">
           {post.user.username || "New user"}{" "}

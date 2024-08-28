@@ -8,6 +8,7 @@ export default interface Post {
   my_likes: likes[];
   created_at: string;
   user_id: string;
+  likes: likesCount[],
 }
 
 export interface User {
@@ -26,4 +27,8 @@ export interface likes {
   post_id: number;
   user_id: string;
   created_at: string;
+}
+
+interface likesCount {
+  count: number;
 }

@@ -31,15 +31,13 @@ export default function FeedScreen() {
     isLoading(true);
     let { data, error } = await supabase
       .from("posts")
-      .select("*, user: profiles(*), my_likes: likes(*)")
+      .select("*, user: profiles(*), my_likes: likes(*), likes(count)")
       .eq('my_likes.user_id', user?.id)
       .order("created_at", { ascending: false });
     if (error) {
       alert(error);
     }
-    console.log(JSON.stringify(data, null, 2));
-    // console.log(data);
-
+    
     setPosts(data);
     isLoading(false);
   };
