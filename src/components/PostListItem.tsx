@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Feather, Ionicons, AntDesign } from "@expo/vector-icons";
-import Interface from "~/assets/data/interface";
+import Interface, { likes } from "~/assets/data/interface";
 import { AdvancedImage } from "cloudinary-react-native";
 //imports required for size change
 import { thumbnail } from "@cloudinary/url-gen/actions/resize";
@@ -25,12 +25,15 @@ import { useAuth } from "../provides/AuthProvider";
 
 export default function PostListItem({ post }: { post: Interface }) {
   const [isLiked, setIsLiked] = useState(false);
-  const [likeRecord, setLikeRecord] = useState(null);
+  const [likeRecord, setLikeRecord] = useState<likes | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
-    fetchLike();
-  }, []);
+    if(post.my_likes.length > 0){
+      setLikeRecord(post.my_likes[0]);
+      setIsLiked(true);
+    }
+  }, [post.my_likes]);
 
   useEffect(() => {
     if (isLiked) {
@@ -40,18 +43,18 @@ export default function PostListItem({ post }: { post: Interface }) {
     }
   }, [isLiked]);
 
-  const fetchLike = async () => {
-    const { data, error } = await supabase
-      .from("likes")
-      .select("*")
-      .eq("user_id", user?.id)
-      .eq("post_id", post.id)
-      .select();
-    if (data && data?.length > 0) {
-      setLikeRecord(data[0]);
-      setIsLiked(true);
-    }
-  };
+  // const fetchLike = async () => {
+  //   const { data, error } = await supabase
+  //     .from("likes")
+  //     .select("*")
+  //     .eq("user_id", user?.id)
+  //     .eq("post_id", post.id)
+  //     .select();
+  //   if (data && data?.length > 0) {
+  //     setLikeRecord(data[0]);
+  //     setIsLiked(true);
+  //   }
+  // };
 
   const saveLike = async () => {
     if (likeRecord) return;
@@ -60,8 +63,8 @@ export default function PostListItem({ post }: { post: Interface }) {
       .from("likes")
       .insert([{ user_id: user?.id, post_id: post.id }])
       .select();
-
-    setLikeRecord(result.data[0]);
+    
+    if(result.data) setLikeRecord(result.data[0]);
   };
 
   const deleteLike = async () => {
@@ -100,13 +103,8 @@ export default function PostListItem({ post }: { post: Interface }) {
         <PostContent post={post} />
       </TouchableOpacity>
 
-      {/* Content */}
-      <Text className="ml-3 m-2 text-xl mt-3 dark:text-white">
-        {post.caption}
-      </Text>
-
       {/* Icons */}
-      <View className="flex-row pl-3 pb-3 pr-3 items-center gap-4 mt-2">
+      <View className="flex-row pl-3 pb-1 pr-3 items-center gap-4 mt-3">
         <AntDesign
           onPress={() => setIsLiked(!isLiked)}
           name={isLiked ? "heart" : "hearto"}
@@ -128,6 +126,14 @@ export default function PostListItem({ post }: { post: Interface }) {
           />
         </View>
       </View>
+      {/* Content */}
+      <Text className="ml-3 font-bold text-l dark:text-white">54 Likes</Text>
+      <Text className="ml-3 text-l mb-3 dark:text-white">
+        <Text className="text-xl font-semibold">
+          {post.user.username || "New user"}{" "}
+        </Text>{" "}
+        {post.caption || "**caption missing**"}
+      </Text>
     </View>
   );
 }
