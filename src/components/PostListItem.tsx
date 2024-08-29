@@ -1,24 +1,12 @@
-import {
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  useWindowDimensions,
-  View,
-  TouchableOpacity,
-} from "react-native";
+import { Text, useColorScheme, View, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Feather, Ionicons, AntDesign } from "@expo/vector-icons";
 import Interface, { likes } from "~/assets/data/interface";
 import { AdvancedImage } from "cloudinary-react-native";
-//imports required for size change
 import { thumbnail } from "@cloudinary/url-gen/actions/resize";
-import { byRadius } from "@cloudinary/url-gen/actions/roundCorners";
 import { focusOn } from "@cloudinary/url-gen/qualifiers/gravity";
 import { FocusOn } from "@cloudinary/url-gen/qualifiers/focusOn";
 import { cld } from "~/src/lib/cloudinary";
-import { Video, ResizeMode } from "expo-av";
 import PostContent from "./PostContent";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../provides/AuthProvider";
@@ -42,20 +30,16 @@ export default function PostListItem({ post }: { post: Interface }) {
     } else {
       deleteLike();
     }
-  }, [isLiked]);
 
-  // const fetchLike = async () => {
-  //   const { data, error } = await supabase
-  //     .from("likes")
-  //     .select("*")
-  //     .eq("user_id", user?.id)
-  //     .eq("post_id", post.id)
-  //     .select();
-  //   if (data && data?.length > 0) {
-  //     setLikeRecord(data[0]);
-  //     setIsLiked(true);
-  //   }
-  // };
+    //Updating likes
+    if (isLiked) {
+      const updatedCount = (post.likes?.[0]?.count || 0) + 1;
+      post.likes[0] = { ...post.likes[0], count: updatedCount };
+    } else {
+      const updatedCount = (post.likes?.[0]?.count > 0) ? post.likes?.[0]?.count - 1 : 0;
+      post.likes[0] = { ...post.likes[0], count: updatedCount };
+    }
+  }, [isLiked]);
 
   const saveLike = async () => {
     if (likeRecord) return;
@@ -65,17 +49,12 @@ export default function PostListItem({ post }: { post: Interface }) {
       .insert([{ user_id: user?.id, post_id: post.id }])
       .select();
 
-    if (result.data){
+    if (result.data) {
       setLikeRecord(result.data[0]);
+
+      //Sending notification to the owner of the post
       sendLikeNotification(result.data[0]);
-    } 
-
-    // const updatedCount = (post.likes?.[0]?.count || 0) + 1;
-    // if (post.likes) {
-    //   post.likes[0] = { ...post.likes[0], count: updatedCount };
-    // }
-
-    //send notification to the owner of the post
+    }
   };
 
   const deleteLike = async () => {

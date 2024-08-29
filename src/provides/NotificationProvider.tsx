@@ -24,13 +24,13 @@ export default function NotificationProvider({ children }) {
       .then((token) => setExpoPushToken(token ?? ""))
       .catch((error: any) => setExpoPushToken(`${error}`));
 
-    notificationListener.current =
-      Notifications.addNotificationReceivedListener((notification) => {
-        return Alert.alert(
-          notification.request.content.title || "notification",
-          notification.request.content.body || "Notification Body"
-        );
-      });
+    // notificationListener.current =
+    //   Notifications.addNotificationReceivedListener((notification) => {
+    //     return Alert.alert(
+    //       notification.request.content.title || "notification",
+    //       notification.request.content.body || "Notification Body"
+    //     );
+    //   });
 
     return () => {
       notificationListener.current &&

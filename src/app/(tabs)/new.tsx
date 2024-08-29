@@ -8,7 +8,7 @@ import {
   ScrollView,
   ActivityIndicator,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import Button from "../../components/Button";
 import { uploadImage } from "~/src/lib/cloudinary";
@@ -21,9 +21,10 @@ import { Video, ResizeMode } from "expo-av";
 export default function CreatePost() {
   const [caption, setCaption] = useState("");
   const [media, setMedia] = useState<string | null>(null);
-  const [mediaType, setMediaType] = useState<'video' | 'image' | undefined>();
+  const [mediaType, setMediaType] = useState<"video" | "image" | undefined>();
   const [loading, setLoading] = useState(false);
   const { session } = useAuth();
+  const videoRef = useRef<Video>(null);
 
   useEffect(() => {
     if (!media) {
@@ -49,7 +50,7 @@ export default function CreatePost() {
   const createPost = async () => {
     setLoading(true);
     //Upload image
-    if (!media) {
+    if (!media || !caption) {
       return;
     }
     const response = await uploadImage(media);
@@ -70,6 +71,9 @@ export default function CreatePost() {
     console.log("data", data);
     console.log("error", error);
 
+    if (videoRef.current) {
+      videoRef.current.stopAsync();
+    }
     router.push("/(tabs)");
   };
 
@@ -84,18 +88,19 @@ export default function CreatePost() {
           {/* IMage Picker */}
           {!media ? (
             <View className="w-60 aspect-[3/4] bg-slate-500 shadow-2xl rounded-xl justify-center align-middle">
-            <Text className="color-white font-bold text-center text-l">
-              No media is selected
-            </Text>
-          </View>
-          ) : mediaType === 'image' ? (
+              <Text className="color-white font-bold text-center text-l">
+                No media is selected
+              </Text>
+            </View>
+          ) : mediaType === "image" ? (
             <Image
               source={{ uri: media }}
               className="w-60 aspect-[3/4] bg-gray-700 shadow-2xl rounded-xl"
             />
           ) : (
             <Video
-              style={{ width: '90%', aspectRatio: 1, borderRadius: 15 }}
+              ref={videoRef}
+              style={{ width: "90%", aspectRatio: 1, borderRadius: 15 }}
               source={{
                 uri: media,
               }}
@@ -104,7 +109,7 @@ export default function CreatePost() {
               isLooping
               shouldPlay
             />
-          )} 
+          )}
 
           <Text
             className="text-blue-500 font-semibold m-5 text-l"
