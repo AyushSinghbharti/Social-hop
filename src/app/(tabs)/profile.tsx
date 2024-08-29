@@ -22,10 +22,10 @@ import CustomTextInput from "~/src/components/CustomTextInput";
 
 export default function ProfilePage() {
   const [image, setImage] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState("");
   const [bio, setBio] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
   const { session } = useAuth();
 
   const pickImage = async () => {
@@ -64,6 +64,10 @@ export default function ProfilePage() {
         setUserName(data.username);
         setAvatarUrl(data.avatar_url);
         setBio(data.bio);
+
+        //setting image
+        const image = cld.image(data.avatar_url);
+        setImage(image.toURL());
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -75,7 +79,7 @@ export default function ProfilePage() {
   }
 
   async function updateProfile() {
-    if (!image || !userName ) {
+    if (!image || (!userName && !bio)) {
       Alert.alert("Please Upload images, username and bio");
       return;
     }
@@ -116,15 +120,20 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <ActivityIndicator
-        className="self-center flex-1 justify-center align-center color-blue-400"
-        size={50}
-      />
+      <View className="flex-1 bg-white dark:bg-black">
+        <ActivityIndicator
+          className="self-center flex-1 justify-center align-center color-blue-400 dark:bg-black"
+          size={50}
+        />
+      </View>
     );
   }
 
   return (
-    <KeyboardAvoidingView behavior={"padding"} className="flex-1 bg-white dark:bg-black">
+    <KeyboardAvoidingView
+      behavior={"padding"}
+      className="flex-1 bg-white dark:bg-black"
+    >
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View className="flex-1 pt-2 px-2  bg-white dark:bg-black">
           {/* Image Picker */}
@@ -135,7 +144,9 @@ export default function ProfilePage() {
             />
           ) : avatarUrl ? (
             <AdvancedImage
-              cldImg={cld.image(avatarUrl).resize(thumbnail().width(200).height(200))}
+              cldImg={cld
+                .image(avatarUrl)
+                .resize(thumbnail().width(200).height(200))}
               className="w-60 aspect-square border-gray-500 border-2 rounded-full self-center"
             />
           ) : (

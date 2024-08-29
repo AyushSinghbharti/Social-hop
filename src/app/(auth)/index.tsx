@@ -54,9 +54,9 @@ export default function Auth() {
     <View style={styles.container}>
       <Image
         source={{
-          uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRwH--J-ZMUg8puNfUxE6YXQi3yVHuAORDxow&s",
+          uri: "https://images-platform.99static.com//8731F2XCutThOEPWeGEatr1SeLs=/554x502:3048x2992/fit-in/500x500/projects-files/77/7714/771418/3ecfd419-611b-44ab-8fe9-e2b3b05e3dcc.png",
         }}
-        className="h-56 w-56 mt-auto"
+        className="h-56 w-full mt-auto"
       />
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <TextInput
