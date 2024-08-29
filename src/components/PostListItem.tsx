@@ -22,6 +22,7 @@ import { Video, ResizeMode } from "expo-av";
 import PostContent from "./PostContent";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../provides/AuthProvider";
+import { sendLikeNotification } from "../app/utils/notifications";
 
 export default function PostListItem({ post }: { post: Interface }) {
   const [isLiked, setIsLiked] = useState(false);
@@ -64,7 +65,17 @@ export default function PostListItem({ post }: { post: Interface }) {
       .insert([{ user_id: user?.id, post_id: post.id }])
       .select();
 
-    if (result.data) setLikeRecord(result.data[0]);
+    if (result.data){
+      setLikeRecord(result.data[0]);
+      sendLikeNotification(result.data[0]);
+    } 
+
+    // const updatedCount = (post.likes?.[0]?.count || 0) + 1;
+    // if (post.likes) {
+    //   post.likes[0] = { ...post.likes[0], count: updatedCount };
+    // }
+
+    //send notification to the owner of the post
   };
 
   const deleteLike = async () => {
