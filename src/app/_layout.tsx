@@ -1,5 +1,4 @@
 import { Slot, Stack, Tabs } from "expo-router";
-import "../../global.css";
 import AuthProvider from "../provides/AuthProvider";
 
 export default function RootLayout() {
