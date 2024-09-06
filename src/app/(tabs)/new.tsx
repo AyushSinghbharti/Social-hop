@@ -3,10 +3,10 @@ import {
   Text,
   View,
   Image,
-  TextInput,
   KeyboardAvoidingView,
   ScrollView,
   ActivityIndicator,
+  useColorScheme,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
@@ -25,6 +25,9 @@ export default function CreatePost() {
   const [loading, setLoading] = useState(false);
   const { session } = useAuth();
   const videoRef = useRef<Video>(null);
+  const colorScheme = useColorScheme(); // Detect light or dark mode
+
+  const isDarkMode = colorScheme === "dark";
 
   useEffect(() => {
     if (!media) {
@@ -33,7 +36,6 @@ export default function CreatePost() {
   }, [media]);
 
   const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
@@ -49,13 +51,11 @@ export default function CreatePost() {
 
   const createPost = async () => {
     setLoading(true);
-    //Upload image
     if (!media || !caption) {
       return;
     }
     const response = await uploadImage(media);
 
-    //Uploading image at supabase
     const { data, error } = await supabase
       .from("posts")
       .insert([
@@ -80,30 +80,27 @@ export default function CreatePost() {
   return (
     <KeyboardAvoidingView
       behavior={"padding"}
-      style={{ flex: 1 }}
-      className="dark:bg-black"
+      style={[styles.container, isDarkMode && styles.darkContainer]}
     >
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View className="p-3 items-center flex-1">
-          {/* IMage Picker */}
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <View style={[styles.content, isDarkMode && styles.darkContent]}>
+          {/* Image Picker */}
           {!media ? (
-            <View className="w-60 aspect-[3/4] bg-slate-500 shadow-2xl rounded-xl justify-center align-middle">
-              <Text className="color-white font-bold text-center text-l">
+            <View style={[styles.placeholderContainer, isDarkMode && styles.darkPlaceholderContainer]}>
+              <Text style={[styles.placeholderText, isDarkMode && styles.darkPlaceholderText]}>
                 No media is selected
               </Text>
             </View>
           ) : mediaType === "image" ? (
             <Image
               source={{ uri: media }}
-              className="w-60 aspect-[3/4] bg-gray-700 shadow-2xl rounded-xl"
+              style={[styles.image, isDarkMode && styles.darkImage]}
             />
           ) : (
             <Video
               ref={videoRef}
-              style={{ width: "90%", aspectRatio: 1, borderRadius: 15 }}
-              source={{
-                uri: media,
-              }}
+              style={[styles.video, isDarkMode && styles.darkVideo]}
+              source={{ uri: media }}
               useNativeControls
               resizeMode={ResizeMode.COVER}
               isLooping
@@ -112,7 +109,7 @@ export default function CreatePost() {
           )}
 
           <Text
-            className="text-blue-500 font-semibold m-5 text-l"
+            style={[styles.changeText, isDarkMode && styles.darkChangeText]}
             onPress={pickImage}
           >
             Change
@@ -123,14 +120,16 @@ export default function CreatePost() {
             value={caption}
             onChangeText={setCaption}
             placeholder="Enter name of your post"
+            textInputStyle={isDarkMode ? styles.darkTextInput : styles.lightTextInput}
           />
 
           {/* Button */}
-          <View className="w-full mb-2" style={{ marginTop: "auto" }}>
+          <View style={styles.buttonContainer}>
             {loading ? (
               <ActivityIndicator
                 size={40}
-                className=" self-center color-blue-300 m-auto"
+                color={isDarkMode ? "#60a5fa" : "#3b82f6"}
+                style={styles.loader}
               />
             ) : (
               <Button title={"Share Post"} onPress={createPost} />
@@ -141,3 +140,103 @@ export default function CreatePost() {
     </KeyboardAvoidingView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "white",
+  },
+  darkContainer: {
+    backgroundColor: "#000",
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+  },
+  content: {
+    padding: 12,
+    alignItems: "center",
+    flex: 1,
+  },
+  darkContent: {
+    backgroundColor: "#1f2937", // dark-gray
+  },
+  placeholderContainer: {
+    width: 240,
+    aspectRatio: 3 / 4,
+    backgroundColor: "#64748b", // slate-500 equivalent
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  darkPlaceholderContainer: {
+    backgroundColor: "#374151", // dark-gray
+  },
+  placeholderText: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+    fontSize: 16,
+  },
+  darkPlaceholderText: {
+    color: "#d1d5db", // light-gray
+  },
+  image: {
+    width: 240,
+    aspectRatio: 3 / 4,
+    backgroundColor: "#374151", // gray-700 equivalent
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    borderRadius: 15,
+  },
+  darkImage: {
+    backgroundColor: "#1f2937", // dark-gray
+  },
+  video: {
+    width: "90%",
+    aspectRatio: 1,
+    borderRadius: 15,
+  },
+  darkVideo: {
+    borderColor: "#374151", // dark-gray
+  },
+  changeText: {
+    color: "#3b82f6", // blue-500 equivalent
+    fontWeight: "600",
+    marginVertical: 20,
+    fontSize: 16,
+  },
+  darkChangeText: {
+    color: "#60a5fa", // light-blue
+  },
+  buttonContainer: {
+    width: "100%",
+    marginBottom: 16,
+    marginTop: "auto",
+  },
+  loader: {
+    alignSelf: "center",
+  },
+  textInput: {
+    width: '100%',
+    padding: 12,
+    borderWidth: 1,
+    borderRadius: 8,
+    marginVertical: 8,
+  },
+  lightTextInput: {
+    borderColor: '#d1d5db', // light-gray
+    backgroundColor: '#fff',
+    color: '#000',
+  },
+  darkTextInput: {
+    borderColor: '#4b5563', // dark-gray
+    backgroundColor: '#1f2937', // dark-gray
+    color: '#fff',
+  },
+});

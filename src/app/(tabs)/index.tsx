@@ -17,6 +17,7 @@ export default function FeedScreen() {
   const [posts, setPosts] = useState<Post[] | null>(null);
   const [loading, isLoading] = useState(false);
   const { user } = useAuth();
+
   useFocusEffect(
     useCallback(() => {
       fetchPost();
@@ -32,32 +33,33 @@ export default function FeedScreen() {
     let { data, error } = await supabase
       .from("posts")
       .select("*, user: profiles(*), my_likes: likes(*), likes(count)")
-      .eq('my_likes.user_id', user?.id)
+      .eq("my_likes.user_id", user?.id)
       .order("created_at", { ascending: false });
     if (error) {
       alert(error);
     }
-    
+
     setPosts(data);
     isLoading(false);
   };
 
   if (loading) {
     return (
-      <View className="items-center justify-center flex-1 dark:bg-black">
+      <View style={styles.loaderContainer}>
         <ActivityIndicator
           size={50}
-          className=" self-center color-blue-300 m-auto dark:color-slate-300"
+          color="#60a5fa"
+          style={styles.loader}
         />
       </View>
     );
   }
 
   return (
-    <View className="flex-1 dark:bg-gray-900">
+    <View style={styles.container}>
       <FlatList
         data={posts}
-        contentContainerStyle={{ gap: 3, maxWidth: 512, width: "100%" }}
+        contentContainerStyle={styles.flatListContent}
         keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => <PostListItem post={item} />}
@@ -65,3 +67,24 @@ export default function FeedScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "black", // dark:bg-black equivalent
+  },
+  loader: {
+    alignSelf: "center",
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "#1f2937", // dark:bg-gray-900 equivalent
+  },
+  flatListContent: {
+    gap: 3,
+    maxWidth: 512,
+    width: "100%",
+  },
+});

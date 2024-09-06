@@ -3,12 +3,11 @@ import {
   Text,
   View,
   Image,
-  TextInput,
   KeyboardAvoidingView,
   Alert,
   ActivityIndicator,
-  Platform,
   ScrollView,
+  useColorScheme,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
@@ -27,9 +26,11 @@ export default function ProfilePage() {
   const [userName, setUserName] = useState("");
   const [bio, setBio] = useState("");
   const { session } = useAuth();
+  const colorScheme = useColorScheme(); // Detect light or dark mode
+
+  const isDarkMode = colorScheme === "dark";
 
   const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -65,7 +66,6 @@ export default function ProfilePage() {
         setAvatarUrl(data.avatar_url);
         setBio(data.bio);
 
-        //setting image
         const image = cld.image(data.avatar_url);
         setImage(image.toURL());
       }
@@ -80,11 +80,10 @@ export default function ProfilePage() {
 
   async function updateProfile() {
     if (!image || (!userName && !bio)) {
-      Alert.alert("Please Upload images, username and bio");
+      Alert.alert("Please upload image, username, and bio");
       return;
     }
 
-    //Uploading image at cloudinary
     setLoading(true);
     const response = await uploadImage(image);
     setAvatarUrl(response?.public_id);
@@ -105,7 +104,6 @@ export default function ProfilePage() {
         .eq("id", session?.user.id)
         .select();
 
-      console.log(data);
       if (error) {
         throw error;
       }
@@ -120,11 +118,8 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-white dark:bg-black">
-        <ActivityIndicator
-          className="self-center flex-1 justify-center align-center color-blue-400 dark:bg-black"
-          size={50}
-        />
+      <View style={[styles.loadingContainer, isDarkMode && styles.darkBackground]}>
+        <ActivityIndicator size={50} color={isDarkMode ? "#60a5fa" : "#3b82f6"} />
       </View>
     );
   }
@@ -132,45 +127,43 @@ export default function ProfilePage() {
   return (
     <KeyboardAvoidingView
       behavior={"padding"}
-      className="flex-1 bg-white dark:bg-black"
+      style={[styles.container, isDarkMode && styles.darkBackground]}
     >
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View className="flex-1 pt-2 px-2  bg-white dark:bg-black">
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <View style={styles.content}>
           {/* Image Picker */}
           {image ? (
-            <Image
-              source={{ uri: image }}
-              className="w-60 aspect-square bg-gray-700 shadow-black drop-shadow-2xl rounded-full self-center"
-            />
+            <Image source={{ uri: image }} style={styles.avatarImage} />
           ) : avatarUrl ? (
             <AdvancedImage
               cldImg={cld
                 .image(avatarUrl)
                 .resize(thumbnail().width(200).height(200))}
-              className="w-60 aspect-square border-gray-500 border-2 rounded-full self-center"
+              style={styles.avatarImage}
             />
           ) : (
-            <View className="w-60 aspect-square bg-slate-500 shadow-2xl rounded-full justify-center align-middle self-center">
-              <Text className="color-white font-bold text-center text-l">
+            <View style={[styles.placeholderContainer, isDarkMode && styles.darkPlaceholder]}>
+              <Text style={[styles.placeholderText, isDarkMode && styles.darkPlaceholderText]}>
                 No image is selected
               </Text>
             </View>
           )}
           <Text
-            className="text-blue-500 font-semibold m-5 text-l self-center"
+            style={[styles.changeText, isDarkMode && styles.darkChangeText]}
             onPress={pickImage}
           >
             Change
           </Text>
 
-          {/* form */}
-          <View className="gap-3">
+          {/* Form */}
+          <View style={styles.formContainer}>
             <CustomTextInput
               label="Username"
               placeholder="Username"
               value={userName}
               onChangeText={setUserName}
               multiline
+              textInputStyle={{ color: isDarkMode ? "#fff" : "#000" }}
             />
 
             <CustomTextInput
@@ -179,11 +172,12 @@ export default function ProfilePage() {
               value={bio}
               onChangeText={setBio}
               multiline
+              textInputStyle={{ color: isDarkMode ? "#fff" : "#000" }}
             />
           </View>
 
           {/* Buttons */}
-          <View className="gap-2 mt-auto mb-2">
+          <View style={styles.buttonsContainer}>
             <Button title="Update Profile" onPress={updateProfile} />
             <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
           </View>
@@ -193,4 +187,75 @@ export default function ProfilePage() {
   );
 }
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "white",
+  },
+  darkBackground: {
+    backgroundColor: "#000",
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "white",
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+  },
+  content: {
+    flex: 1,
+    padding: 16,
+  },
+  avatarImage: {
+    width: 240,
+    height: 240,
+    borderRadius: 120,
+    alignSelf: "center",
+    backgroundColor: "#374151",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+  },
+  placeholderContainer: {
+    width: 240,
+    height: 240,
+    backgroundColor: "#64748b",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 120,
+    alignSelf: "center",
+  },
+  darkPlaceholder: {
+    backgroundColor: "#374151",
+  },
+  placeholderText: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  darkPlaceholderText: {
+    color: "#d1d5db",
+  },
+  changeText: {
+    color: "#3b82f6",
+    fontWeight: "600",
+    fontSize: 16,
+    marginTop: 20,
+    textAlign: "center",
+  },
+  darkChangeText: {
+    color: "#60a5fa",
+  },
+  formContainer: {
+    marginTop: 24,
+    gap: 12,
+  },
+  buttonsContainer: {
+    marginTop: "auto",
+    marginBottom: 16,
+    gap: 12,
+  },
+});

@@ -56,7 +56,7 @@ export default function Auth() {
         source={{
           uri: "https://images-platform.99static.com//8731F2XCutThOEPWeGEatr1SeLs=/554x502:3048x2992/fit-in/500x500/projects-files/77/7714/771418/3ecfd419-611b-44ab-8fe9-e2b3b05e3dcc.png",
         }}
-        className="h-56 w-full mt-auto"
+        style={styles.image}
       />
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <TextInput
@@ -64,7 +64,7 @@ export default function Auth() {
           value={email}
           placeholder="email@address.com"
           autoCapitalize={"none"}
-          className="border border-gray-400 p-3 rounded-md"
+          style={styles.input}
         />
       </View>
       <View style={styles.verticallySpaced}>
@@ -74,12 +74,12 @@ export default function Auth() {
           secureTextEntry={true}
           placeholder="Password"
           autoCapitalize={"none"}
-          className="border border-gray-400 p-3 rounded-md"
+          style={styles.input}
         />
       </View>
       {loading ? (
         <View style={[styles.verticallySpaced, styles.mt20]}>
-          <ActivityIndicator className="bg-blue-300 w-full p-3 items-center rounded-lg mt-auto color-white" />
+          <ActivityIndicator style={styles.loader} color="white" />
         </View>
       ) : (
         <View style={[styles.verticallySpaced, styles.mt20]}>
@@ -88,11 +88,11 @@ export default function Auth() {
       )}
 
       {loading ? (
-        <View style={[styles.verticallySpaced]} className="mb-auto">
-          <ActivityIndicator className="bg-blue-300 w-full p-3 items-center rounded-lg mt-auto color-white" />
+        <View style={[styles.verticallySpaced, styles.mbAuto]}>
+          <ActivityIndicator style={styles.loader} color="white" />
         </View>
       ) : (
-        <View style={styles.verticallySpaced} className="mb-auto">
+        <View style={[styles.verticallySpaced, styles.mbAuto]}>
           <Button title="Sign up" onPress={() => signUpWithEmail()} />
         </View>
       )}
@@ -107,12 +107,33 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     padding: 12,
   },
+  image: {
+    height: 224, // h-56 equivalent
+    width: "100%",
+    marginTop: "auto",
+  },
   verticallySpaced: {
     paddingTop: 4,
     paddingBottom: 4,
     alignSelf: "stretch",
   },
+  input: {
+    borderColor: "gray",
+    borderWidth: 1,
+    padding: 12, // p-3 equivalent
+    borderRadius: 8, // rounded-md equivalent
+  },
   mt20: {
     marginTop: 20,
+  },
+  loader: {
+    backgroundColor: "#93c5fd", // bg-blue-300 equivalent
+    width: "100%",
+    padding: 12, // p-3 equivalent
+    alignItems: "center",
+    borderRadius: 8, // rounded-lg equivalent
+  },
+  mbAuto: {
+    marginBottom: "auto",
   },
 });
