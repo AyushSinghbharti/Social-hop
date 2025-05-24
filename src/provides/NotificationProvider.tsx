@@ -99,7 +99,7 @@ async function registerForPushNotificationsAsync() {
           projectId,
         })
       ).data;
-      console.log(pushTokenString); //Allow to check Expo push token
+      console.log("pushToken: ", pushTokenString); //Allow to check Expo push token
       return pushTokenString;
     } catch (e: unknown) {
       handleRegistrationError(`${e}`);

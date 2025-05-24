@@ -8,10 +8,10 @@ export async function sendLikeNotification(like) {
     .select("*, posts(*, profiles(*))")
     .eq("id", like.id)
     .single();
-  console.log(JSON.stringify(data, null, 2));
+  // console.log(JSON.stringify(data, null, 2));
 
   const pushToken = data?.posts?.profiles?.push_token;
-  console.log(pushToken);
+  console.log("pushToken at notifications.tsx\n", pushToken);
   if(!pushToken) return;
 
   const message = {

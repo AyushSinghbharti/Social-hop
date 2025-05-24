@@ -36,7 +36,8 @@ export default function FeedScreen() {
       .eq("my_likes.user_id", user?.id)
       .order("created_at", { ascending: false });
     if (error) {
-      alert(error);
+      console.log("error message", error);
+      alert(error.message);
     }
 
     setPosts(data);
