@@ -27,7 +27,7 @@ SocialHop is a social networking app built with React Native, utilizing Expo and
 - **Styling**: [NativeWind](https://nativewind.dev/) (a variant of Tailwind CSS for React Native)
 
 ## Run on Expo Go
-<img src="https://github.com/user-attachments/assets/1e26dc9e-b898-452a-a36c-d820d5f28559" alt="image" width="300" height="300">
+<img src="https://github.com/user-attachments/assets/8c8b409f-c7b1-4cce-bd49-77223979aac3" alt="image" width="300" height="300">
 
 ## Getting Started
 
